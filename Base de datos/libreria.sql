@@ -517,6 +517,65 @@ ALTER TABLE `productoeditorial`
   ADD CONSTRAINT `productoeditorial_ibfk_1` FOREIGN KEY (`productoISBN`) REFERENCES `producto` (`ISBN`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `productoeditorial_ibfk_2` FOREIGN KEY (`editorialIdEditorial`) REFERENCES `editorial` (`id_editorial`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
+--Vistas
+--
+--Vista 1:  muestra detalles de las compras realizadas por cada cliente,
+-- incluyendo información sobre los productos comprados, las fechas de compra y los montos totales.
+CREATE VIEW DetallesComprasPorCliente AS
+SELECT
+  nc.FolioNC,
+  nc.Fecha,
+  c.Nombre AS Cliente,
+  p.nombre AS Producto,
+  dnc.precioProducto,
+  dnc.cantidadProducto,
+  dnc.impuesto,
+  (dnc.precioProducto * dnc.cantidadProducto) AS MontoTotal
+FROM
+  notacompra nc
+  JOIN proveedor pr ON nc.proveedorId_proveedor = pr.id_proveedor
+  JOIN detallenc dnc ON nc.FolioNC = dnc.notaCompraFolioNC
+  JOIN producto p ON dnc.productoISBN = p.ISBN
+  JOIN cliente c ON pr.nombre = c.Nombre;
+
+--Vista 2: Muestra un resumen de los encargos realizados agrupados por autor, 
+--incluyendo detalles sobre los productos encargados y los abonos realizados.
+CREATE VIEW ResumenEncargosPorAutor AS
+SELECT
+  a.nombre AS Autor,
+  p.nombre AS Producto,
+  e.FolioEncargo,
+  e.Abono,
+  de.precioProducto,
+  de.cantidadProducto,
+  de.impuestoProducto
+FROM
+  encargo e
+  JOIN cliente c ON e.clienteId_cte = c.id_cte
+  JOIN detalleencargo de ON e.FolioEncargo = de.encargoFolioEncargo
+  JOIN producto p ON de.productoISBN = p.ISBN
+  JOIN productoautor pa ON p.ISBN = pa.productoISBN
+  JOIN autor a ON pa.autorIdAutor = a.id_autor;
+
+--vista 3: Proporciona un informe de las ventas realizadas por cada editorial,
+-- mostrando detalles sobre los productos vendidos, las fechas de venta y los montos totales.
+CREATE VIEW VentasPorEditorial AS
+SELECT
+  nv.folioNV,
+  nv.fechaVenta,
+  e.nombre AS Editorial,
+  p.nombre AS Producto,
+  dnv.precioProducto,
+  dnv.cantidadProdcuto, 
+  dnv.impuesto,
+  (dnv.precioProducto * dnv.cantidadProdcuto) AS MontoTotal
+FROM
+  notaventa nv
+  JOIN cliente c ON nv.clienteId_cte = c.id_cte
+  JOIN detallenv dnv ON nv.folioNV = dnv.notaVentaFolioNV
+  JOIN producto p ON dnv.productoISBN = p.ISBN
+  JOIN productoeditorial pe ON p.ISBN = pe.productoISBN
+  JOIN editorial e ON pe.editorialIdEditorial = e.id_editorial;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
