@@ -583,6 +583,25 @@ SELECT clienteId_cte AS ClienteID, Nombre AS ClienteNombre FROM encargo
 INTERSECT
 SELECT clienteId_cte, Nombre FROM notaventa;
 
+--Uso de Rollup
+--Si se requiere estructurar la consulta para obtener totales 
+--para todas las combinaciones de autor, editorial y cliente
+SELECT
+  autor.nombre AS Autor,
+  editorial.nombre AS Editorial,
+  cliente.Nombre AS Cliente,
+  SUM(dnv.precioProducto * dnv.cantidadProdcuto) AS MontoTotal
+FROM
+  notaventa nv
+  LEFT JOIN cliente ON nv.clienteId_cte = cliente.id_cte
+  LEFT JOIN detallenv dnv ON nv.folioNV = dnv.notaVentaFolioNV
+  LEFT JOIN producto p ON dnv.productoISBN = p.ISBN
+  LEFT JOIN productoautor pa ON p.ISBN = pa.productoISBN
+  LEFT JOIN autor ON pa.autorIdAutor = autor.id_autor
+  LEFT JOIN productoeditorial pe ON p.ISBN = pe.productoISBN
+  LEFT JOIN editorial ON pe.editorialIdEditorial = editorial.id_editorial
+GROUP BY autor.nombre, editorial.nombre, cliente.Nombre WITH ROLLUP;
+
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
