@@ -577,6 +577,12 @@ FROM
   JOIN productoeditorial pe ON p.ISBN = pe.productoISBN
   JOIN editorial e ON pe.editorialIdEditorial = e.id_editorial;
 
+-- Uso de intersec en 1 consulta
+-- Obtener clientes comunes en compras y encargos
+SELECT clienteId_cte AS ClienteID, Nombre AS ClienteNombre FROM encargo
+INTERSECT
+SELECT clienteId_cte, Nombre FROM notaventa;
+
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
